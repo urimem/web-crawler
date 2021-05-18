@@ -12,19 +12,9 @@ public class Crawler {
     // Url processing queue is unbounded - consider limiting & handling spill
     BlockingQueue<UrlProcessData> urlProcessingQueue = new LinkedBlockingDeque<UrlProcessData>();
 
-    // Used to queue page processing jobs
-    class UrlProcessData{
-        public WebPage parent;
-        public String newPageUrl;
-
-        UrlProcessData(WebPage parent, String newPageUrl) {
-            this.parent = parent;
-            this.newPageUrl = newPageUrl;
-        }
-    }
-
     public void start(String rootPageUrl) {
         this.webPageGraph = new WebPageGraph(rootPageUrl);
+        // Adding the root page to the queue as the first URL processing job
         urlProcessingQueue.add(new UrlProcessData(null, rootPageUrl));
 
         // generate executor and submit UrlProcessor runnables to it

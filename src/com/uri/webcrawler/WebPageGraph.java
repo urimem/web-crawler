@@ -15,9 +15,21 @@ public class WebPageGraph {
         this.rootPageUrl = rootPageUrl;
     }
 
-    //contains
+    public boolean contains(String url) {
+        return pages.containsKey(url);
+    }
 
-    //add
+    public WebPage find(String url) {
+        return pages.get(url);
+    }
+
+    public WebPage add(String url) {
+        if (pages.containsKey(url))
+            return pages.get(url);
+        else {
+            return pages.put(url, new WebPage(url));
+        }
+    }
 
     @Override
     public String toString() {

@@ -8,7 +8,7 @@ class WebPage {
     // TODO: Must be Concurrent?
     private ConcurrentHashMap<String, WebPage> linkedPages = new ConcurrentHashMap<>();
 
-    private WebPage(String url) {
+    WebPage(String url) {
         this.url = url;
     }
 
