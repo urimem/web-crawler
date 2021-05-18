@@ -16,9 +16,9 @@ class WebPage {
         return url;
     }
 
-    public Iterator<WebPage> getLinkedPages()
+    public Iterable<WebPage> getLinkedPages()
     {
-        return (Iterator<WebPage>) linkedPages.values();
+        return (Iterable<WebPage>) linkedPages.values();
     }
 
     public void addLinkedPage(WebPage page) {

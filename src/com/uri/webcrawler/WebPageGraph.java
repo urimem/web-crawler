@@ -27,10 +27,13 @@ public class WebPageGraph {
         if (pages.containsKey(url))
             return pages.get(url);
         else {
-            return pages.put(url, new WebPage(url));
+            var newPage = new WebPage(url);
+            pages.put(url, newPage);
+            return newPage;
         }
     }
 
+    // TODO: get JSON output
     @Override
     public String toString() {
         Set<String> printedPageUrls = new HashSet<String>();
@@ -45,10 +48,10 @@ public class WebPageGraph {
             result.append(indent).append(page.getUrl()).append('\n');
         }
         else {
+            // page not printed yet
             result.append(indent).append(page.getUrl()).append('\n');
             printedPageUrls.add(page.getUrl());
-            for (Iterator<WebPage> it = page.getLinkedPages(); it.hasNext(); ) {
-                WebPage child = it.next();
+            for (WebPage child : page.getLinkedPages()) {
                 graphTraverse(printedPageUrls, result,child, indent+'\t');
             }
         }

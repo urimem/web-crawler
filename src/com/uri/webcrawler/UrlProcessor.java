@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,40 +19,57 @@ class UrlProcessor implements Runnable {
     private final BlockingQueue<UrlProcessData> urlProcessingQueue;
     // Crawler's web page graph
     private final WebPageGraph graph;
+    private String domainLimit;
+    private int id;
+    private boolean active = true;
+    private final int POLL_TIMEOUT = 5000;      // Wait on empty queue before exit
+    private final int MAX_JOBS = 20;            // Max jobs to be handled by processor
 
-    public UrlProcessor(BlockingQueue<UrlProcessData> urlProcessingQueue, WebPageGraph graph) {
+    public UrlProcessor(BlockingQueue<UrlProcessData> urlProcessingQueue, WebPageGraph graph, String domainLimit, int id) {
         this.urlProcessingQueue = urlProcessingQueue;
         this.graph = graph;
+        this.domainLimit = domainLimit;
+        this.id = id;
     }
 
     @Override
     public void run() {
         try {
-            while (true) {
+            int counter = 0; // TODO: replace ugly counter with main Crawler timeout
+            while (active) {
                 // Blocking queue will block the thread if empty
-                var newPageData = urlProcessingQueue.take();
-                if (!graph.contains(newPageData.newPageUrl)) {
-                    // Create new web page in the graph
-                    WebPage newPage = graph.add(newPageData.newPageUrl);
-                    // Link the parent page to the new page
-                    newPageData.parent.addLinkedPage(newPage);
-                    // Retrieve and iterate linked pages
-                    for (String url : getLinkedPages(newPage.getUrl())) {
-                       if (graph.contains(url)) {
-                           // Get existing page and add as linkedPage to newPage
-                           newPage.addLinkedPage(graph.find(url));
-                       }
-                       else {
-                           // Add to new url to urlProcessingQueue
-                           urlProcessingQueue.add(new UrlProcessData(newPage, url));
-                       }
-                    }
-
+                var newPageData = urlProcessingQueue.poll(POLL_TIMEOUT, TimeUnit.MILLISECONDS);
+                if (newPageData == null) {
+                    this.active = false;
                 }
-
+                else {
+                    System.out.println("UrlProcessor " + this.id + " URL:" + newPageData.newPageUrl);
+                    if (!graph.contains(newPageData.newPageUrl)) {
+                        // Create new web page in the graph
+                        WebPage newPage = graph.add(newPageData.newPageUrl);
+                        // Link the parent page to the new page
+                        if (newPageData.parent != null) {
+                            newPageData.parent.addLinkedPage(newPage);
+                        }
+                        // Retrieve and iterate linked pages
+                        for (String url : getLinkedPages(newPage.getUrl())) {
+                            if (graph.contains(url)) {
+                                // Get existing page and add as linkedPage to newPage
+                                newPage.addLinkedPage(graph.find(url));
+                            } else {
+                                // Add to new url to urlProcessingQueue
+                                urlProcessingQueue.add(new UrlProcessData(newPage, url));
+                            }
+                        }
+                    }
+                }
+                counter++;
+                if (counter >= MAX_JOBS) {
+                    active = false;
+                }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("UrlProcessor " + id + " interupted" );
         }
     }
 
@@ -80,7 +99,20 @@ class UrlProcessor implements Runnable {
 
                 for (Element link : links) {
                     if (link.attr("href").startsWith("htt")) {
-                        result.add(link.attr("href"));
+
+                        String foundUrl = link.attr("href");
+                        int index = foundUrl.lastIndexOf('#');
+                        if (index != -1) {
+                            foundUrl = foundUrl.substring(0, index);
+                        }
+                        if (domainLimit != null) {
+                            if (foundUrl.contains((CharSequence)domainLimit)) {
+                                result.add(foundUrl);
+                            }
+                        }
+                        else {
+                            result.add(foundUrl);
+                        }
                     }
                 }
             }
@@ -89,5 +121,9 @@ class UrlProcessor implements Runnable {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
