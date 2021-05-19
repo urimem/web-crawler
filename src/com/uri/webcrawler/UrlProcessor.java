@@ -37,7 +37,7 @@ class UrlProcessor implements Runnable {
         try {
             int counter = 0; // TODO: replace ugly counter with main Crawler timeout
             while (active) {
-                // Blocking queue will block the thread if empty
+                // urlProcessingQueue will block the thread if empty for POLL_TIMEOUT and then return null
                 var newPageData = urlProcessingQueue.poll(POLL_TIMEOUT, TimeUnit.MILLISECONDS);
                 if (newPageData == null) {
                     this.active = false;
@@ -69,7 +69,7 @@ class UrlProcessor implements Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            System.out.println("UrlProcessor " + id + " interupted" );
+            System.out.println("UrlProcessor " + id + " interrupted" );
         }
     }
 

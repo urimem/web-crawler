@@ -1,7 +1,6 @@
 package com.uri.webcrawler;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,11 +8,11 @@ public class WebPageGraph {
     // Key = Full URL string
     // TODO: remove the schema/protocol part, remove #fragment part
     private ConcurrentHashMap<String, WebPage> pages = new ConcurrentHashMap<>();
-    private final String rootPageUrl;
+    private WebPage rootPage;
 
-    public WebPageGraph(String rootPageUrl) {
-        this.rootPageUrl = rootPageUrl;
-    }
+    //public WebPageGraph(String rootPageUrl) {
+    //    this.rootPageUrl = rootPageUrl;
+    //}
 
     public boolean contains(String url) {
         return pages.containsKey(url);
@@ -29,6 +28,9 @@ public class WebPageGraph {
         else {
             var newPage = new WebPage(url);
             pages.put(url, newPage);
+            if (rootPage == null) {
+                rootPage = newPage;
+            }
             return newPage;
         }
     }
@@ -36,9 +38,12 @@ public class WebPageGraph {
     // TODO: get JSON output
     @Override
     public String toString() {
-        Set<String> printedPageUrls = new HashSet<String>();
+        if (rootPage == null) {
+            return "Graph is empty";
+        }
+        Set<String> printedPageUrls = new HashSet<>();
         StringBuffer result = new StringBuffer();
-        graphTraverse(printedPageUrls, result,pages.get(rootPageUrl), "");
+        graphTraverse(printedPageUrls, result, rootPage, "");
         return result.toString();
     }
 

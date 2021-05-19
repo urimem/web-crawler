@@ -1,6 +1,8 @@
 
 import com.uri.webcrawler.Crawler;
 
+import java.net.MalformedURLException;
+
 public class Main {
 
     static final String DEFAULT_ROOT_URL = "https://www.baeldung.com"; // "https://www.worldtimebuddy.com";  // "http://www.columbia.edu/~fdc/sample.html";
@@ -11,16 +13,18 @@ public class Main {
     public static void main(String[] args) {
 
         var crawler = new Crawler();
-
-        if (args.length == 0) {
-            crawler.start(DEFAULT_ROOT_URL, DOMAIN_LIMIT);
-        } else {
-            if (args.length >= 2) {
-                crawler.start(args[0], Boolean.parseBoolean(args[1]));
+        try {
+            if (args.length == 0) {
+                crawler.start(DEFAULT_ROOT_URL, DOMAIN_LIMIT);
+            } else {
+                if (args.length >= 2) {
+                    crawler.start(args[0], Boolean.parseBoolean(args[1]));
+                } else {
+                    crawler.start(args[0], DOMAIN_LIMIT);
+                }
             }
-            else {
-                crawler.start(args[0], DOMAIN_LIMIT);
-            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
     }
 }

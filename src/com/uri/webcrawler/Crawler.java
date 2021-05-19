@@ -8,25 +8,21 @@ import java.util.concurrent.*;
 // Scraping linked pages (a href)
 public class Crawler {
 
-    private final int PROCESSEOR_COUNT = 30;
-    private WebPageGraph webPageGraph;
-    // Url processing queue is unbounded - consider limiting & handling spill
-    BlockingQueue<UrlProcessData> urlProcessingQueue = new LinkedBlockingDeque<UrlProcessData>();
+    private final int MAX_CONCURRENT_PROCESSORS = 30;
+    private final WebPageGraph webPageGraph = new WebPageGraph();                   // In memory graph
+    BlockingQueue<UrlProcessData> urlProcessingQueue = new LinkedBlockingDeque<>(); // Unbound - consider limiting & handling spill
 
-    public void start(String rootPageUrl, boolean limitDomain) {
+    public void start(String rootPageUrl, boolean limitToRootDomain) throws MalformedURLException {
         String domain = null;
-        try {
+        if (limitToRootDomain) {
             URL uri = new URL(rootPageUrl);
             domain = uri.getHost();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         }
-        this.webPageGraph = new WebPageGraph(rootPageUrl);
         // Adding the root page to the queue as the first URL processing job
         urlProcessingQueue.add(new UrlProcessData(null, rootPageUrl));
 
-        ThreadPoolExecutor executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(PROCESSEOR_COUNT);
-        for (int i =0; i < PROCESSEOR_COUNT; i++ ) {
+        ThreadPoolExecutor executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(MAX_CONCURRENT_PROCESSORS);
+        for (int i = 0; i < MAX_CONCURRENT_PROCESSORS; i++ ) {
             var urlProcessor = new UrlProcessor(urlProcessingQueue, webPageGraph, domain, i);
             executor.submit(urlProcessor);
         }
@@ -79,6 +75,6 @@ public class Crawler {
         //executor.shutdown();
         System.out.println("Queue size:" + urlProcessingQueue.size());
         System.out.println("URL Graph print:");
-        System.out.println(webPageGraph.toString());
+        System.out.println(webPageGraph);
     }
 }
