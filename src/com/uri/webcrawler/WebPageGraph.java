@@ -1,18 +1,17 @@
 package com.uri.webcrawler;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebPageGraph {
     // Key = Full URL string
-    // TODO: remove the schema/protocol part, remove #fragment part
     private ConcurrentHashMap<String, WebPage> pages = new ConcurrentHashMap<>();
     private WebPage rootPage;
-
-    //public WebPageGraph(String rootPageUrl) {
-    //    this.rootPageUrl = rootPageUrl;
-    //}
 
     public boolean contains(String url) {
         return pages.containsKey(url);
@@ -22,6 +21,9 @@ public class WebPageGraph {
         return pages.get(url);
     }
 
+    public int size() {
+        return pages.size();
+    }
     public WebPage add(String url) {
         if (pages.containsKey(url))
             return pages.get(url);
@@ -35,7 +37,30 @@ public class WebPageGraph {
         }
     }
 
-    // TODO: get JSON output
+    public JSONObject toJSON() {
+        Set<String> addedPageUrls = new HashSet<>();
+        return buildJSON(addedPageUrls, rootPage);
+    }
+
+    // Recursive
+    private JSONObject buildJSON(Set<String> addedPageUrls, WebPage page) {
+        JSONObject currentPage = new JSONObject();
+        if (addedPageUrls.contains(page.getUrl())) {
+            currentPage.put("linkedPages", "...");
+        }
+        else {
+            addedPageUrls.add(page.getUrl());
+            // First time adding this page -> process linked pages
+            JSONArray linkedPages = new JSONArray();
+            for (WebPage child : page.getLinkedPages()) {
+                linkedPages.put(buildJSON(addedPageUrls, child));
+            }
+            currentPage.put("linkedPages", linkedPages);
+        }
+        currentPage.put("url", page.getUrl());
+        return currentPage;
+    }
+
     @Override
     public String toString() {
         if (rootPage == null) {

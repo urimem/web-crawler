@@ -1,5 +1,7 @@
 package com.uri.webcrawler;
 
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.*;
@@ -8,11 +10,11 @@ import java.util.concurrent.*;
 // Scraping linked pages (a href)
 public class Crawler {
 
-    private final int MAX_CONCURRENT_PROCESSORS = 30;
-    private final WebPageGraph webPageGraph = new WebPageGraph();                   // In memory graph
+    private final int MAX_CONCURRENT_PROCESSORS = 10;
+    final WebPageGraph webPageGraph = new WebPageGraph();
     BlockingQueue<UrlProcessData> urlProcessingQueue = new LinkedBlockingDeque<>(); // Unbound - consider limiting & handling spill
 
-    public void start(String rootPageUrl, boolean limitToRootDomain) throws MalformedURLException {
+    public void start(String rootPageUrl, boolean limitToRootDomain, long timeout) throws MalformedURLException {
         String domain = null;
         if (limitToRootDomain) {
             URL uri = new URL(rootPageUrl);
@@ -27,43 +29,22 @@ public class Crawler {
             executor.submit(urlProcessor);
         }
 
-        // TODO: better check that threads have finished also...
-        // executor.getQueue().iterator()
-
-        boolean active = true;
-        while (active) {
-            try {
-
-                System.out.println("Queue size:" + urlProcessingQueue.size());
-                if (urlProcessingQueue.size() == 0) {
-                    Thread.sleep(5000);
-                    if (urlProcessingQueue.size() == 0) {
-                        active = false;                        // disable for debug
-                    }
-                } else
-                    Thread.sleep(4000);
-
-
-                Thread.sleep(10000);
-                active = false;
-                //((LinkedBlockingDeque)urlProcessingQueue).clear();
-
-
-            } catch (InterruptedException e) {
-                //Log.write("URL file not found or interrupt exception");
-                e.printStackTrace();
-            }
+        executor.shutdown(); // Not getting new tasks
+        try {
+            boolean finishedOk = executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+            //if (!finishedOk) System.out.println("Crawler timeout reached.");  // DEBUG
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        System.out.println("Initiating shutdown");
-        executor.shutdown(); // Disable new tasks from being submitted
         try {
             // Wait a while for existing tasks to terminate
-            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
                 executor.shutdownNow(); // Cancel currently executing tasks
                 // Wait a while for tasks to respond to being cancelled
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-                    System.err.println("Pool did not terminate");
+                if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
+                    //System.err.println("Pool did not terminate");     // DEBUG
+                }
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted
@@ -72,9 +53,10 @@ public class Crawler {
             Thread.currentThread().interrupt();
         }
 
-        //executor.shutdown();
-        System.out.println("Queue size:" + urlProcessingQueue.size());
-        System.out.println("URL Graph print:");
-        System.out.println(webPageGraph);
+        //System.out.println("Crawler - END - Queue size:" + urlProcessingQueue.size());    // DEBUG
+    }
+
+    public JSONObject getGraph() {
+        return webPageGraph.toJSON();
     }
 }

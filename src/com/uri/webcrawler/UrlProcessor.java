@@ -1,8 +1,10 @@
 package com.uri.webcrawler;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -22,8 +24,7 @@ class UrlProcessor implements Runnable {
     private String domainLimit;
     private int id;
     private boolean active = true;
-    private final int POLL_TIMEOUT = 5000;      // Wait on empty queue before exit
-    private final int MAX_JOBS = 20;            // Max jobs to be handled by processor
+    private final int EMPTY_QUEUE_TIMEOUT = 5000;      // Wait on empty queue before exit
 
     public UrlProcessor(BlockingQueue<UrlProcessData> urlProcessingQueue, WebPageGraph graph, String domainLimit, int id) {
         this.urlProcessingQueue = urlProcessingQueue;
@@ -35,15 +36,15 @@ class UrlProcessor implements Runnable {
     @Override
     public void run() {
         try {
-            int counter = 0; // TODO: replace ugly counter with main Crawler timeout
             while (active) {
                 // urlProcessingQueue will block the thread if empty for POLL_TIMEOUT and then return null
-                var newPageData = urlProcessingQueue.poll(POLL_TIMEOUT, TimeUnit.MILLISECONDS);
+                var newPageData = urlProcessingQueue.poll(EMPTY_QUEUE_TIMEOUT, TimeUnit.MILLISECONDS);
                 if (newPageData == null) {
                     this.active = false;
+                    //System.out.println("Processor empty queue timeout");  // DEBUG
                 }
                 else {
-                    System.out.println("UrlProcessor " + this.id + " URL:" + newPageData.newPageUrl);
+                    //System.out.println("UrlProcessor " + this.id + " URL:" + newPageData.newPageUrl); // DEBUG
                     if (!graph.contains(newPageData.newPageUrl)) {
                         // Create new web page in the graph
                         WebPage newPage = graph.add(newPageData.newPageUrl);
@@ -63,13 +64,9 @@ class UrlProcessor implements Runnable {
                         }
                     }
                 }
-                counter++;
-                if (counter >= MAX_JOBS) {
-                    active = false;
-                }
             }
         } catch (InterruptedException e) {
-            System.out.println("UrlProcessor " + id + " interrupted" );
+            //System.out.println("UrlProcessor " + id + " interrupted" );   // DEBUG
         }
     }
 
@@ -80,7 +77,6 @@ class UrlProcessor implements Runnable {
             URL pageUrl = new URL(url);
             HttpURLConnection con = (HttpURLConnection) pageUrl.openConnection();
             con.setRequestMethod("GET");
-
             int status = con.getResponseCode();
             // TODO: handle other statuses - retry or back to queue
             if (status == 200) {
@@ -93,6 +89,7 @@ class UrlProcessor implements Runnable {
                 }
                 in.close();
                 con.disconnect();
+
                 // Parse web page and extract all links
                 Document doc = Jsoup.parse(content.toString());
                 Elements links = doc.select("a[href]");
@@ -101,6 +98,7 @@ class UrlProcessor implements Runnable {
                     if (link.attr("href").startsWith("htt")) {
 
                         String foundUrl = link.attr("href");
+                        // Remove page fragments (internal links)
                         int index = foundUrl.lastIndexOf('#');
                         if (index != -1) {
                             foundUrl = foundUrl.substring(0, index);
@@ -117,13 +115,10 @@ class UrlProcessor implements Runnable {
                 }
             }
         }
-        catch (Exception e) {
+        catch (IOException e) {
+            // Catching will return an empty array
             e.printStackTrace();
         }
         return result;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 }
