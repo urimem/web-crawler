@@ -14,6 +14,7 @@ Notes
 - The result page graph will be printed to System.out.
 
 Object diagram
+
 ![alt text](http://s3.amazonaws.com/bezmoog.com/crawler_small.png)
 
 
