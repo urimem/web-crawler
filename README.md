@@ -1,6 +1,8 @@
 **Web Crawler**
 
-Simple web crawler.
+Object diagram
+
+![alt text](http://s3.amazonaws.com/bezmoog.com/crawler_small.png)
 
 Using concurrent URL processors and building in-memory page graph.
 
@@ -12,11 +14,6 @@ Run Main.class with following parameters:
 Notes
 - Linked pages are collected only by a href links
 - The result page graph will be printed to System.out.
-
-Object diagram
-
-![alt text](http://s3.amazonaws.com/bezmoog.com/crawler_small.png)
-
 
 
 
