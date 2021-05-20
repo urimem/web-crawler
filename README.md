@@ -1,17 +1,20 @@
 **Web Crawler**
 
 Simple web crawler.
-- Initial URL list is retrieved from txt file
-- Count the number of chars in the response
-- Collect and process linked pages (URLs) - don't repeat existing
-- Future: build and output URLs in a graph/tree structure
-- Output summary to a file. Future: use a standard log (Log4j / Logstash)
-- Start with in-memory queue & tree/graph. Future: use services 
 
-Subjects covered:
-- Simple file usage
-- Http calls - Using Jsoup (RegEx also an option)
-- Concurrency
+Using concurrent URL processors and building in-memory page graph.
+
+Run Main.class with following parameters:
+1. String - Root crawling URL
+2. boolean - Limit domain to the root URL domain - other domains will not be added or processed. Default true.
+3. long - milliseconds crawler timeout, for processing big websites. 0 = no timeout
+
+Notes
+- Linked pages are collected only by a href links
+- The result page graph will be printed to System.out.
+
+Object diagram
+![alt text](http://s3.amazonaws.com/bezmoog.com/crawler_small.png)
 
 
 

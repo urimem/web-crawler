@@ -5,12 +5,12 @@ import java.net.MalformedURLException;
 
 public class Main {
 
-    static final String DEFAULT_ROOT_URL = "https://s3.amazonaws.com/bezmoog.com/index.html"; //"https://www.baeldung.com";  // "https://www.worldtimebuddy.com";  // "http://www.columbia.edu/~fdc/sample.html";
+    static final String DEFAULT_ROOT_URL = "https://s3.amazonaws.com/bezmoog.com/index.html";
     static final boolean DOMAIN_LIMIT = true;
     static final long CRAWLER_TIMEOUT = 6000;
 
     // Parameter 1: String - root crawling URL
-    // Parameter 2: boolean - limit domain to the root domain - will not be added or processed. Default true.
+    // Parameter 2: boolean - limit domain to the root domain - other domains will not be added or processed. Default true.
     // Parameter 3: long - milliseconds crawler timeout, for processing big websites. 0 = no timeout
     public static void main(String[] args) {
 
