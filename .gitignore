@@ -2,14 +2,14 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+#.idea/**/workspace.xml
+#.idea/**/tasks.xml
+#.idea/**/usage.statistics.xml
+#.idea/**/dictionaries
+#.idea/**/shelf
 
 # Generated files
-.idea/**/contentModel.xml
+#.idea/**/contentModel.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -21,8 +21,8 @@
 .idea/**/dbnavigator.xml
 
 # Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
+#.idea/**/gradle.xml
+#.idea/**/libraries
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
@@ -34,7 +34,7 @@
 # .idea/modules.xml
 # .idea/*.iml
 # .idea/modules
-*.iml
+# *.iml
 # *.ipr
 
 # CMake
@@ -50,7 +50,7 @@ cmake-build-*/
 out/
 
 # mpeltonen/sbt-idea plugin
-.idea_modules/
+#.idea_modules/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
@@ -65,11 +65,11 @@ crashlytics-build.properties
 fabric.properties
 
 # Editor-based Rest Client
-.idea/httpRequests
+#.idea/httpRequests
 
 # Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
-.idea/
+#.idea/caches/build_file_checksums.ser
+#.idea/
 
 .DS_Store
 target/
