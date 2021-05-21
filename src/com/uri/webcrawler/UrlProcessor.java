@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -21,8 +20,8 @@ class UrlProcessor implements Runnable {
     private final BlockingQueue<UrlProcessData> urlProcessingQueue;
     // Crawler's web page graph
     private final WebPageGraph graph;
-    private String domainLimit;
-    private int id;
+    private final String domainLimit;
+    private final int id;
     private boolean active = true;
     private final int EMPTY_QUEUE_TIMEOUT = 5000;      // Wait on empty queue before exit
 
@@ -104,7 +103,7 @@ class UrlProcessor implements Runnable {
                             foundUrl = foundUrl.substring(0, index);
                         }
                         if (domainLimit != null) {
-                            if (foundUrl.contains((CharSequence)domainLimit)) {
+                            if (foundUrl.contains(domainLimit)) {
                                 result.add(foundUrl);
                             }
                         }

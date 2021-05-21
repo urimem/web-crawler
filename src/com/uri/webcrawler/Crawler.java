@@ -11,6 +11,7 @@ import java.util.concurrent.*;
 public class Crawler {
 
     private final int MAX_CONCURRENT_PROCESSORS = 10;
+    private final int THREAD_FINISH_DELAY = 3;          // Used for termination process
     final WebPageGraph webPageGraph = new WebPageGraph();
     BlockingQueue<UrlProcessData> urlProcessingQueue = new LinkedBlockingDeque<>(); // Unbound - consider limiting & handling spill
 
@@ -19,6 +20,9 @@ public class Crawler {
         if (limitToRootDomain) {
             URL uri = new URL(rootPageUrl);
             domain = uri.getHost();
+        }
+        if (timeout < 0) {
+            timeout = 0;
         }
         // Adding the root page to the queue as the first URL processing job
         urlProcessingQueue.add(new UrlProcessData(null, rootPageUrl));
@@ -31,20 +35,20 @@ public class Crawler {
 
         executor.shutdown(); // Not getting new tasks
         try {
-            boolean finishedOk = executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);
-            //if (!finishedOk) System.out.println("Crawler timeout reached.");  // DEBUG
+            executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+            //boolean finishedOk = executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);   // DEBUG
+            //if (!finishedOk) System.out.println("Crawler timeout reached.");                  // DEBUG
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         try {
             // Wait a while for existing tasks to terminate
-            if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(THREAD_FINISH_DELAY, TimeUnit.SECONDS)) {
                 executor.shutdownNow(); // Cancel currently executing tasks
                 // Wait a while for tasks to respond to being cancelled
-                if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
+                executor.awaitTermination(THREAD_FINISH_DELAY, TimeUnit.SECONDS);
                     //System.err.println("Pool did not terminate");     // DEBUG
-                }
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted

@@ -39,6 +39,9 @@ public class WebPageGraph {
 
     public JSONObject toJSON() {
         Set<String> addedPageUrls = new HashSet<>();
+        if (rootPage == null) {
+            return new JSONObject("url", "Graph is empty");
+        }
         return buildJSON(addedPageUrls, rootPage);
     }
 
