@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="UrlProcessorTest" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+    <module name="webcrawler" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.uri.webcrawler.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="com.uri.webcrawler" />
+    <option name="MAIN_CLASS_NAME" value="com.uri.webcrawler.UrlProcessorTest" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
