@@ -15,7 +15,35 @@ class CrawlerTest {
     static final long CRAWLER_NO_TIMEOUT = 0;
 
     @Test
-    void crawlSampleSite() {
+    void crawlSampleSiteDrilldown() {
+        Crawler crawler = new Crawler();
+        try {
+            crawler.start(SAMPLE_SITE_URL, DOMAIN_LIMIT, CRAWLER_TIMEOUT);
+            int pagesCount = crawler.webPageGraph.size();
+            assertEquals(12, pagesCount);
+            WebPage page = null;
+            page = crawler.webPageGraph.find(SAMPLE_SITE_URL);
+            for (WebPage child : page.getLinkedPages()) {
+                if (child.getUrl().contains("vehicles")) {
+                    page = child;
+                    break;
+                }
+            }
+            assertTrue(page.getUrl().contains("vehicles"));
+            for (WebPage child : page.getLinkedPages()) {
+                if (child.getUrl().contains("airplane")) {
+                    page = child;
+                    break;
+                }
+            }
+            assertTrue(page.getUrl().contains("airplane.html"));
+        } catch (MalformedURLException e) {
+            assertTrue(false);  // URL is verified
+        }
+    }
+
+    @Test
+    void crawlSampleSiteFindPage() {
         Crawler crawler = new Crawler();
         try {
             crawler.start(SAMPLE_SITE_URL, DOMAIN_LIMIT, CRAWLER_TIMEOUT);
@@ -28,4 +56,5 @@ class CrawlerTest {
             assertTrue(false);  // URL is verified
         }
     }
+
 }

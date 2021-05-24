@@ -18,7 +18,8 @@ Run Main.class with following parameters (all has defaults):
 2. boolean - Limit domain to the root URL domain - other domains will not be added or processed. Default true.
 3. long - milliseconds crawler timeout, for processing big websites. 0 = no timeout
 
-You edit the Main class or add parameters in the Main run configuration.
+You can edit the Main class or add parameters in the Main run configuration.
+Simple testing site: https://s3.amazonaws.com/bezmoog.com/index.html
    
 **Notes**
 - Linked pages are collected only by a href links

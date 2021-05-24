@@ -48,6 +48,7 @@ public class WebPageGraph {
     // Recursive
     private JSONObject buildJSON(Set<String> addedPageUrls, WebPage page) {
         JSONObject currentPage = new JSONObject();
+        currentPage.put("url", page.getUrl());
         if (addedPageUrls.contains(page.getUrl())) {
             currentPage.put("linkedPages", "...");
         }
@@ -60,7 +61,6 @@ public class WebPageGraph {
             }
             currentPage.put("linkedPages", linkedPages);
         }
-        currentPage.put("url", page.getUrl());
         return currentPage;
     }
 
