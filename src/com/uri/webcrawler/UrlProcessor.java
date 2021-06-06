@@ -44,12 +44,12 @@ class UrlProcessor implements Runnable {
                 }
                 else {
                     //System.out.println("UrlProcessor " + this.id + " URL:" + newPageData.newPageUrl); // DEBUG
-                    if (!graph.contains(newPageData.newPageUrl)) {
+                    if (!graph.contains(newPageData.getNewPageUrl())) {
                         // Create new web page in the graph
-                        WebPage newPage = graph.add(newPageData.newPageUrl);
+                        WebPage newPage = graph.add(newPageData.getNewPageUrl());
                         // Link the parent page to the new page
-                        if (newPageData.parent != null) {
-                            newPageData.parent.addLinkedPage(newPage);
+                        if (newPageData.getParent() != null) {
+                            newPageData.getParent().addLinkedPage(newPage);
                         }
                         // Retrieve and iterate linked pages
                         for (String url : getLinkedPages(newPage.getUrl())) {
@@ -112,6 +112,9 @@ class UrlProcessor implements Runnable {
                         }
                     }
                 }
+            }
+            else if (status == 404) {
+
             }
         }
         catch (IOException e) {
